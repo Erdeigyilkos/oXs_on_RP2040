@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#define VERSION "2.5.0"
+#define VERSION "2.5.0-1.0.0"
 
 //#define DEBUG  // force the MCU to wait for some time for the USB connection; still continue if not connected
 
@@ -96,7 +96,7 @@
 
 #define SBUS2_SLOT_HOLD_COUNTER_1 28    // Count the number of hold frames ; require 1 slot; emulate F1713
 #define SBUS2_SLOT_FAILSAFE_COUNTER_1 29    // Count the number of failsafeframes ; require 1 slot; emulate F1713
-
+#define SBUS2_SLOT_GPS_DATE 25 
 // ----------Parameters for multiplex protocol -----------------
 // MPX can have max 16 telemetry fields
 // The list below defines the fields that can be transmitted.

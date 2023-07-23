@@ -2,6 +2,7 @@
 
 
 #include "config.h"
+#include "TinyGPS.h"
 
 // from the UBlox6 document, the largest payout we receive i the NAV-SVINFO and the payload size
 // is calculated as 8 + 12*numCh.  numCh in the case of a Glonass receiver is 28.
@@ -198,6 +199,8 @@ public:
     // **********************
     // GPS data being read
     // **********************
+    TinyGPS NMEA;
+    
     bool gpsInstalled = false;
     uint8_t gpsState = GPS_WAIT_END_OF_RESET;
     uint16_t initGpsIdx = 0 ; // index of the bytes to be sent to configure the GPS
@@ -252,6 +255,7 @@ public:
     void readGps();
     void readGpsUblox();
     void readGpsCasic();
+    void readGpsNmea();
     bool parseGps(void) ;
     bool parseGpsUblox(void) ;
     bool parseGpsCasic(void) ;

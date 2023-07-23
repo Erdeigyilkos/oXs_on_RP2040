@@ -262,8 +262,6 @@ void setColorState(){    // set the colors based on the RF link
             setRgbColorOn(10, 5, 0); //yellow
             break;
         case STATE_FAILSAFE:
-            setRgbColorOn(0, 0, 10); //blue
-            break;
         default:
             setRgbColorOn(10, 0, 0); //red
             break;     
@@ -318,7 +316,7 @@ void setup() {
   while ( (!tud_cdc_connected()) && (counter--)) { 
   //while ( (!tud_cdc_connected()) ) { 
     sleep_ms(100);
-    toggleRgb();
+    //toggleRgb();
     }
   sleep_ms(2000);  // in debug mode, wait a little to let USB on PC be able to display all messages
   uint8_t a1[2] = {1, 2};
@@ -567,7 +565,7 @@ void loop() {
     prevLedState = ledState;
     setColorState();     
   } else if ( blinking && (( millisRp() - lastBlinkMillis) > 300 ) ){
-    toggleRgb();
+    //toggleRgb();
     lastBlinkMillis = millisRp();
   }
   //if (get_bootsel_button()) {

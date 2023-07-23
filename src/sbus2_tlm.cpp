@@ -207,6 +207,9 @@ void fill8Sbus2Slots (uint8_t slotGroup){
     if ((fields[LONGITUDE].available) && ( slotGroup == (SBUS2_SLOT_GPS_8 >>3))){
         fillGps(SBUS2_SLOT_GPS_8  & 0x07); // keep 3 last bits as slot index
     }
+    if ((fields[GPS_DATE].available) && ( slotGroup == (SBUS2_SLOT_GPS_DATE >>3))){
+        fillStatusStructure(SBUS2_SLOT_GPS_DATE  & 0x07); // keep 3 last bits as slot index
+    }
     //enableSbus2Transmit();   
 }
 
@@ -347,7 +350,7 @@ void fillBattery(uint8_t slot8){   // emulate SBS/01C ; Current from mA to 0.1A;
 
 
 void fillRpm(uint8_t slot8){ // emulate SBS01RO ; in from Hz to 0.1 RPM 
-    uint32_t value =  fields[RPM].value * 10;
+    uint32_t value =  fields[RPM].value ;;//* 10;
     if(value > 0xffff){
     value = 0xffff;
     }
@@ -494,7 +497,11 @@ void fillGps(uint8_t slot8){ // emulate SBS01G  ; speed from  to Km/h ; Alt from
     slotValueByte2[6] =  (alt&0x3fc)>>2;    // !!!! does not match: other doc says Alt bits 12...5
     // slot (7 (vario & altitude)
     uint16_t vario;
-    // error check vario
+     
+    if (fields[NUMSAT].available) 
+      gpsVario = fields[NUMSAT].value; 
+  
+
     if (gpsVario >= -150 && gpsVario <= 260) {
         // scale vario (add 0.5 for correct rounding)
         vario = (10.0*(gpsVario + 150)) + 0.5;
@@ -508,6 +515,39 @@ void fillGps(uint8_t slot8){ // emulate SBS01G  ; speed from  to Km/h ; Alt from
     slotValueByte1[7] = ((vario&0x001f)<<3) | ((alt&0x1c00)>>10); // vario bits 4...0 + alt bits 15...13 (!!! does not match)
     slotValueByte2[7] =  (vario&0x1fe0)>>5; // does not match other doc that says BARO OK= bit 7, other bits= vario bits 11...5
 }
+
+void fillStatusStructure(uint8_t slot8){
+
+    //current - model ID 
+   static const uint16_t rpID=100;
+   slotAvailable[slot8] = true;
+   slotValueByte1[slot8] = ((rpID >> 8) | 0x40) & 0x7F;
+   slotValueByte2[slot8] = rpID;// >> 8;
+
+   //VOLTAGE
+
+   slotAvailable[slot8 + 1] = true;
+   slotValueByte1[slot8 + 1] = 0 >> 8;
+   slotValueByte2[slot8 + 1] = 0;
+   
+   // CAPACITY - date 
+   int16_t day = (uint8_t)(fields[GPS_DATE].value >> 8);
+   int16_t month = (uint8_t)(fields[GPS_DATE].value >> 16);
+   int16_t year = (uint8_t)(fields[GPS_DATE].value >>24);
+   
+   int16_t gpsDate = day << 8 ;
+   gpsDate |= month << 4;
+   gpsDate |= year-23;
+
+   slotAvailable[slot8+2] = true;
+   slotValueByte1[slot8 + 2] = gpsDate >> 8;
+   slotValueByte2[slot8 + 2] = gpsDate;
+
+
+
+
+}
+
 
 #ifdef SIMULATE_SBUS2_ON_PIN
 

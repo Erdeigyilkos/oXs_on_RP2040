@@ -173,7 +173,8 @@ void GPS::setupGps(void){
 void GPS::readGps(){
     if (config.pinGpsTx == 255) return; // skip if pin is not defined
     if ( ( config.gpsType == 'U')  || ( config.gpsType == 'E') ) handleGpsUblox();
-    if ( config.gpsType == 'C') readGpsCasic();    
+    if ( config.gpsType == 'C') readGpsCasic();   
+    if ( config.gpsType == 'N') readGpsNmea();    
 }
 
 void gpsPioRxHandlerIrq(){    // when a byte is received on the PIO GPS, read the pio fifo and push the data to a queue (to be processed in the main loop)
@@ -194,7 +195,7 @@ void GPS::gpsInitRx(){
     irq_set_enabled (PIO1_IRQ_0 , true) ;
 
     uint gpsOffsetRx = pio_add_program(gpsPio, &uart_rx_program);
-    uart_rx_program_init(gpsPio, gpsSmRx, gpsOffsetRx, config.pinGpsTx, 38400);
+    uart_rx_program_init(gpsPio, gpsSmRx, gpsOffsetRx, config.pinGpsTx, 9600);
     busy_wait_us(1000);
     uint8_t dummy;
     while (! queue_is_empty (&gpsRxQueue)) queue_try_remove ( &gpsRxQueue , &dummy ) ;
@@ -606,6 +607,8 @@ void GPS::readGpsCasic() { // read and process GPS data. do not send them.// for
     }
 }
 
+
+
 bool GPS::parseGpsCasic(void) // move the data from buffer to the different fields
 {
     //printf("sat : %x  posValid %x  height %f\n", _casicBuffer.nav_pv.numSV,  _casicBuffer.nav_pv.velValid , _casicBuffer.nav_pv.height);
@@ -684,6 +687,59 @@ bool GPS::parseGpsCasic(void) // move the data from buffer to the different fiel
     }
     return false;
 }
+
+
+void GPS::readGpsNmea() { // read and process GPS data. do not send them.// for casic gps
+    uint8_t data;
+    static uint8_t _idx;
+    if ( queue_is_empty (&gpsRxQueue)) return;
+    if (queue_try_remove ( &gpsRxQueue , &data ) ) {
+        if (NMEA.encode(data)){ // Did a new valid sentence come in?
+            float flat, flon;
+            unsigned long age;
+            NMEA.f_get_position(&flat, &flon, &age);
+            
+            if(NMEA.satellites()<6) 
+              return;
+                
+            sent2Core0(NUMSAT,NMEA.satellites());
+            sent2Core0(GROUNDSPEED,( NMEA.f_speed_kmph() * 100000) / 3600 );
+            sent2Core0(LONGITUDE, flon * 10000000 ) ;   
+            sent2Core0(LATITUDE, flat * 10000000 ); 
+            sent2Core0(ALTITUDE, NMEA.f_altitude() * 100) ;
+
+            int year;
+            uint8_t month, day, hour, minute, second, hundredths;
+            NMEA.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &age);
+            
+            if (age != NMEA.GPS_INVALID_AGE){
+                gpsDate = year % 100;
+                gpsDate <<= 8;
+                gpsDate += month;
+                gpsDate <<= 8;
+                gpsDate += day;
+                gpsDate <<= 8;
+                gpsDate += 0xFF;
+      
+                gpsTime = hour;
+                gpsTime <<= 8;
+                gpsTime += minute;
+                gpsTime <<= 8;
+                gpsTime += second;
+                gpsTime <<= 8;
+
+                if ( prevGpsTime != gpsTime) {
+                    prevGpsTime = gpsTime; 
+                    sent2Core0(GPS_DATE , gpsDate);
+                    sent2Core0(GPS_TIME , gpsTime);
+               }
+            
+            }
+
+         }
+    }    
+}
+
 
 int32_t GPS::GpsDistanceCm(int32_t deltaLat , int32_t deltaLon){
                 float deltaLatFloat = (float) deltaLat;
