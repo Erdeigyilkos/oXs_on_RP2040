@@ -695,6 +695,8 @@ void GPS::readGpsNmea() { // read and process GPS data. do not send them.// for 
     if ( queue_is_empty (&gpsRxQueue)) return;
     if (queue_try_remove ( &gpsRxQueue , &data ) ) {
         if (NMEA.encode(data)){ // Did a new valid sentence come in?
+            gpsInstalled = true;
+            GPS_fix = true;
             float flat, flon;
             unsigned long age;
             NMEA.f_get_position(&flat, &flon, &age);
@@ -736,6 +738,8 @@ void GPS::readGpsNmea() { // read and process GPS data. do not send them.// for 
             
             }
 
+         }else{
+            gpsInstalled = true;
          }
     }    
 }

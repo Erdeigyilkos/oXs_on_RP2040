@@ -45,6 +45,7 @@ struct CONFIG{
     uint8_t temperature; 
     uint8_t VspeedCompChannel;
     uint8_t ledInverted;
+    uint8_t modelID=0;
 };
 
 void handleUSBCmd(void);

@@ -519,7 +519,7 @@ void fillGps(uint8_t slot8){ // emulate SBS01G  ; speed from  to Km/h ; Alt from
 void fillStatusStructure(uint8_t slot8){
 
     //current - model ID 
-   static const uint16_t rpID=100;
+   static const uint16_t rpID=config.modelID*100;
    slotAvailable[slot8] = true;
    slotValueByte1[slot8] = ((rpID >> 8) | 0x40) & 0x7F;
    slotValueByte2[slot8] = rpID;// >> 8;

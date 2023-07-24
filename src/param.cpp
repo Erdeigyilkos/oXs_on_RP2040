@@ -465,6 +465,10 @@ void processCmd(){
         }
     }
     
+    if ( strcmp("MODELID", pkey) == 0 ) { 
+            config.modelID = atoi(pvalue);
+            updateConfig = true;
+    }
     
     // change scale
     if (( strcmp("SCALE1", pkey) == 0 ) || ( strcmp("SCALE2", pkey) == 0 )\
@@ -959,6 +963,9 @@ void printConfig(){
                                                     , (int) fmap( config.failsafeChannels.ch14 )\
                                                     , (int) fmap( config.failsafeChannels.ch15 ) );
     }
+
+    printf("ModelID: %d \n", config.modelID); 
+
     checkConfig();
 
 }

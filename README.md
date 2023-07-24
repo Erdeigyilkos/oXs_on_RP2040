@@ -19,6 +19,8 @@ Modified project for personal use, using of Futaba system and GPS NEO-6M, MS5611
 - added support for GPS-NMEA (parsing library: https://github.com/mikalhart/TinyGPS )
 - added date transfer support for Futaba transmitters that don't support date, transfer value = day << 8 | month << 4 | 2023-year. It is transmitted as a current sensor. Reconstructable with processLogs.py script.
 
+### 1.1.0
+- modelID can be set without recompilation
 
 ## Developer notes:
 My notes.
