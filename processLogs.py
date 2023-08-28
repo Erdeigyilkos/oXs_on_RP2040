@@ -2,7 +2,7 @@ import os
 import shutil
 
 
-modelName=["UNDEF","LF107","DG1000"]
+modelName=["UNDEF","LF107","DG1000","BIVOJ"]
 
 class lineRecord:
     intUndef = -999999
@@ -155,6 +155,8 @@ def processLogFile(logName):
     lineIndex = 0
     isCopied = False
     GPXwriter = None
+    record = None
+    maxSbusHold = 0
     for line in logRead:
         if lineIndex < 3:
             lineIndex+=1
@@ -162,7 +164,10 @@ def processLogFile(logName):
         
         record = lineRecord()
         record.init(line)
-        
+
+        if maxSbusHold < record.holdFrame:
+            maxSbusHold = record.holdFrame
+
         if record.isDataValid() and isCopied is False:
             createFolder(modelName[record.modelID])
             copyFileWithRightName(logName, modelName[record.modelID], record.decompactDate(), record.time)
@@ -171,6 +176,10 @@ def processLogFile(logName):
         
         if record.isDataValid():
             writeGPXpoint(GPXwriter,record)
+
+
+
+    print(" Processing done, FailSaves:",str(record.failSafe), " MAX SBUS hold:", str(maxSbusHold))
 
     closeGPXWriter(GPXwriter)
     logRead.close()
