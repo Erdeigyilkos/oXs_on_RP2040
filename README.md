@@ -22,6 +22,9 @@ Modified project for personal use, using of Futaba system and GPS NEO-6M, MS5611
 ### 1.1.0
 - modelID can be set without recompilation
 
+### 1.2.0
+- MAX6675 support added, default pin is 8,9,10
+
 ## Developer notes:
 My notes.
 ### UART to RP2040 with local echo: 
@@ -42,6 +45,7 @@ CTRL A + E
 | 8 | GPS | - |
 | 16 | Vario-F1672 | - |
 | 21 | Temperature | from MS5611 |
+| 22 | Temperature | from MAX6675 |
 | 25 | Current | Current=modelID, Capacity = compound date |
 | 28 | Temp-F1713 | SBUS hold frames|
 | 29 | Temp-F1713 | SBUS failsafe frames |

@@ -5,6 +5,7 @@
 #include "MS5611.h"
 #include "SPL06.h"
 #include "BMP280.h"
+#include "max6675.h"
 #include "ms4525.h"
 #include "sdp3x.h"
 #include "vario.h"
@@ -39,6 +40,8 @@
 #include "pico/util/queue.h"
 #include "ds18b20.h"
 #include "hardware/timer.h"
+#include "hardware/spi.h"
+
 // to do : add rpm, temp telemetry fields to jeti protocol
 //         support ex bus jeti protocol on top of ex jeti protocol (not sure it makes lot of sense because bandwitdth is limited)
 //         add switching 8 gpio from one channel
@@ -78,6 +81,8 @@
 
 
 VOLTAGE voltage ;    // class to handle voltages
+
+max6675 termistor; 
 
 MS5611 baro1( (uint8_t) 0x77  );    // class to handle MS5611; adress = 0x77 or 0x76
 SPL06 baro2( (uint8_t) 0x76  );    // class to handle SPL06; adress = 0x77 or 0x76
@@ -209,6 +214,8 @@ void setupSensors(){     // this runs on core1!!!!!!!!
       setupRpm(); // this function perform the setup of pio Rpm
       //printf("rpm done\n");
       
+      termistor.begin(8,10,9);
+
       core1SetupDone = true;
       //printf("end core1 setup\n") ;    
       //getTimerUs(0);   // xxxxx
@@ -243,10 +250,14 @@ void getSensors(void){      // this runs on core1 !!!!!!!!!!!!
     calculateAirspeed( );
     vario1.calculateVspeedDte();
   } 
+
+  termistor.readC();
+
   readRpm();
   #ifdef USE_DS18B20
   ds18b20Read(); 
   #endif
+
 }
 
 void mergeSeveralSensors(void){
