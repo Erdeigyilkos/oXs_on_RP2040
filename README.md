@@ -25,6 +25,9 @@ Modified project for personal use, using of Futaba system and GPS NEO-6M, MS5611
 ### 1.2.0
 - MAX6675 support added, default pin is 8,9,10
 
+### 1.2.1
+- MAX6675 - temp is sent only if data is available
+
 ## Developer notes:
 My notes.
 ### UART to RP2040 with local echo: 

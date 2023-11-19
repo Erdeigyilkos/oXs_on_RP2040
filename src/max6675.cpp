@@ -36,7 +36,7 @@ bool max6675::readC() {
   gpio_put(m_CS, 1);
   data = (MSB << 8) | LSB;
 
-  float temperature = data& 0x4 ? temperature = 500 : (data >> 3) * 0.25;
+  float temperature = data & 0x4 ? 0 : (data >> 3) * 0.25;
 
   if (temperature != 0) {
     sent2Core0(TEMP2, temperature);
