@@ -195,8 +195,19 @@ void MS5611::calculateAltitude(){
     }
     int64_t dT = ((int64_t)((_D2+ _D2Prev) >> 1 )) - (( (uint64_t)_calibrationData[5]) << 8) ;
     int32_t TEMP = 2000 + ((dT * ((int64_t)_calibrationData[6])) >> 23)  ;
-    temperature = TEMP;
-    sent2Core0(TEMP1, temperature/100);
+     
+    if (millisRp() < errorDuration) {
+      compensationFactor = linearMap(millisRp(),0,errorDuration,1,tempEnd/tempStart);
+    } else {
+      compensationFactor = tempCompensationFactorStable ;
+    }
+
+    float compensatedTemp = ((float)TEMP) / compensationFactor ;
+    temperature = compensatedTemp;
+
+    sent2Core0(TEMP1, compensatedTemp/100);
+    
+
     _D2Prev = _D2 ;
     int64_t OFF  = (((int64_t)_calibrationData[2]) << 16) + ((((int64_t)_calibrationData[4]) * dT) >> 7);
     int64_t SENS = (((int64_t)_calibrationData[1]) << 15) + ((((int64_t)_calibrationData[3]) * dT) >> 8);

@@ -109,6 +109,7 @@ uint32_t swapBinary(uint32_t value) ;
 
 int32_t swapBinary(int32_t value) ;
 
+float linearMap(float x, float in_min, float in_max, float out_min, float out_max);
 
 #define DO_DEBUG
 extern int debug ; // set from conf file at runtime

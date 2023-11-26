@@ -75,6 +75,14 @@ private:
   uint32_t _lastConversionRequest = 0;
   uint32_t _lastTempRequest = 0;
   uint32_t _D2Prev;
+  
+  float errorDuration = 8.5 * 60  * 1000;
+  float tempStart = 22.5;
+  float tempEnd  = 30.0;
+  double compensationFactor;
+  const double tempCompensationFactorStable = tempEnd / tempStart;
+
+
 };
 
 

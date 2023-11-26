@@ -694,22 +694,26 @@ void GPS::readGpsNmea() { // read and process GPS data. do not send them.// for 
     static uint8_t _idx;
     if ( queue_is_empty (&gpsRxQueue)) return;
     if (queue_try_remove ( &gpsRxQueue , &data ) ) {
+        gpsInstalled = true;
         if (NMEA.encode(data)){ // Did a new valid sentence come in?
-            gpsInstalled = true;
-            GPS_fix = true;
             float flat, flon;
             unsigned long age;
             NMEA.f_get_position(&flat, &flon, &age);
-            
-            if(NMEA.satellites()<6) 
-              return;
-                
+           
+            if(GPS_fix == false){
+                if(NMEA.satellites() < 6 || NMEA.satellites() == TinyGPS::GPS_INVALID_SATELLITES){
+                    return;
+                }else{
+                    GPS_fix = true;
+                }
+            }
+
             sent2Core0(NUMSAT,NMEA.satellites());
             sent2Core0(GROUNDSPEED,( NMEA.f_speed_kmph() * 100000) / 3600 );
             sent2Core0(LONGITUDE, flon * 10000000 ) ;   
             sent2Core0(LATITUDE, flat * 10000000 ); 
             sent2Core0(ALTITUDE, NMEA.f_altitude() * 100) ;
-
+           
             int year;
             uint8_t month, day, hour, minute, second, hundredths;
             NMEA.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &age);

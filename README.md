@@ -28,6 +28,10 @@ Modified project for personal use, using of Futaba system and GPS NEO-6M, MS5611
 ### 1.2.1
 - MAX6675 - temp is sent only if data is available
 
+### 1.2.2
+- MS5611 - partial elimination of deviation caused by self-heating (for temperature only)
+- GPS - correction of sending first valid data 
+
 ## Developer notes:
 My notes.
 ### UART to RP2040 with local echo: 
