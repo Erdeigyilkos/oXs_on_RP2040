@@ -14,6 +14,8 @@ pico_sdk_init()
 
 add_executable(oXs)
 
+add_subdirectory(src/SD)
+
 pico_generate_pio_header(oXs ${CMAKE_CURRENT_LIST_DIR}/src/uart_crsf_rx.pio )
 pico_generate_pio_header(oXs ${CMAKE_CURRENT_LIST_DIR}/src/uart_crsf_tx.pio )
 pico_generate_pio_header(oXs  ${CMAKE_CURRENT_LIST_DIR}/src/uart_gps_rx.pio )
@@ -27,7 +29,7 @@ pico_generate_pio_header(oXs  ${CMAKE_CURRENT_LIST_DIR}/src/uart_sport_tx_rx.pio
 pico_generate_pio_header(oXs  ${CMAKE_CURRENT_LIST_DIR}/src/uart_srxl2_tx_rx.pio )
 pico_generate_pio_header(oXs  ${CMAKE_CURRENT_LIST_DIR}/src/uart_exbus_tx_rx.pio )
 
-file(GLOB oXs_SRC CONFIGURE_DEPENDS "src/*.h" "src/*.cpp")
+file(GLOB oXs_SRC CONFIGURE_DEPENDS "src/*.h" "src/*.cpp" "src/*.c")
 
 target_sources(oXs PRIVATE ${oXs_SRC}  )
 
@@ -43,6 +45,7 @@ target_link_libraries(oXs PRIVATE
         hardware_adc
         hardware_pwm
         hardware_spi
+        no-OS-FatFS-SD-SDIO-SPI-RPi-Pico
         )
 
 #enable printf on usb

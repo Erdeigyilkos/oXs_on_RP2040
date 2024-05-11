@@ -30,6 +30,7 @@
 #include "fbus.h"
 #include "srxl2.h"
 //#include "param.h"
+#include "sdCardWritter.h"
 
 #include "ws2812.h"
 #include "rpm.h"
@@ -102,6 +103,9 @@ GPS gps;
 // objet to manage the mpu6050
 MPU mpu(1);
 
+//SD card writer
+sdCardWritter sdWritter;
+
 field fields[NUMBER_MAX_IDX];  // list of all telemetry fields and parameters that can be measured (not only used by Sport)
 
 // remapping from sbus value to pwm value
@@ -123,6 +127,7 @@ uint8_t ledState = STATE_NO_SIGNAL;
 uint8_t prevLedState = STATE_NO_SIGNAL;
 
 uint32_t lastBlinkMillis;
+uint32_t lastLogMillis = 0;
 
 queue_t qSensorData;       // send one sensor data to core0; when type=0XFF, it means a command then data= the command (e.g.0XFFFFFFFF = save config)
 queue_t qSendCmdToCore1;
@@ -270,7 +275,7 @@ void setColorState(){    // set the colors based on the RF link
             setRgbColorOn(0, 10, 0); //green
             break;
         case STATE_PARTLY_OK:
-            setRgbColorOn(10, 5, 0); //yellow
+            setRgbColorOn(15, 10, 0); //yellow
             break;
         case STATE_FAILSAFE:
         default:
@@ -569,12 +574,19 @@ void loop() {
   }
 
   handleBootButton(); // check boot button; after double click, change LED to fix blue and next HOLD within 5 sec save the current channnels as Failsafe values
+  
+  if(ledState == STATE_OK){
+    ledState = sdWritter.getFailedCounter() > 2 ? STATE_PARTLY_OK : ledState;
+  }
+
+  
   if (( bootButtonState == ARMED) || ( bootButtonState == SAVED)){
     //setRgbColorOn(0, 0, 10); //blue
   } else if ( ledState != prevLedState){
     //printf(" %d\n ",ledState);
-    prevLedState = ledState;
+
     setColorState();     
+    prevLedState = ledState;
   } else if ( blinking && (( millisRp() - lastBlinkMillis) > 300 ) ){
     //toggleRgb();
     lastBlinkMillis = millisRp();
@@ -589,6 +601,8 @@ void loop() {
 void setup1(){
     multicore_lockout_victim_init();
     setupSensors();    
+    sdWritter.setGPS(&gps);
+    sdWritter.setConfig(&config);
 }
 // main loop on core 1 in order to read the sensors and send the data to core0
 void loop1(){
@@ -600,6 +614,26 @@ void loop1(){
             mpu.calibrationExecute();
         }
     }
+  
+    if(lastLogMillis + 3000  <= millisRp() ){
+    lastLogMillis = millisRp();
+    sdWritter.line.gpsDate = fields[GPS_DATE].value;
+    sdWritter.line.gpsTime = fields[GPS_TIME].value;
+    sdWritter.line.gpsLat =  fields[LATITUDE].value;
+    sdWritter.line.gpsLon =  fields[LONGITUDE].value;
+    sdWritter.line.gpsSpeed = fields[GROUNDSPEED].value;
+    sdWritter.line.gpsAlt = fields[ALTITUDE].value;
+
+    sdWritter.line.sbusHold = fields[SBUS_HOLD_COUNTER].value;
+    sdWritter.line.sbusFailSafe = fields[SBUS_FAILSAFE_COUNTER].value;
+
+    sdWritter.line.Ms5611Altitude = fields[RELATIVEALT].value;
+    sdWritter.line.Ms5611Vario = fields[VSPEED].value;
+    sdWritter.line.Ms5611Temperature = fields[TEMP1].value;
+
+    sdWritter.line.Max6675Temperature = fields[TEMP2].value;
+    sdWritter.writeRecordToSdCard();
+  }
 }
 
 void core1_main(){

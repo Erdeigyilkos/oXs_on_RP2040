@@ -32,12 +32,19 @@ Modified project for personal use, using of Futaba system and GPS NEO-6M, MS5611
 - MS5611 - partial elimination of deviation caused by self-heating (for temperature only)
 - GPS - correction of sending first valid data 
 
+### 1.2.3
+- add SD card logger (SD card library: https://github.com/carlk3/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico)
+- switched SPI pins for SD card and MAX6675
+- status LED indicate SD card error with orange light 
+- convert script works on multiple csv files in folder
+
 ## Developer notes:
 My notes.
 ### UART to RP2040 with local echo: 
 ```sh
 minicom -b 115200 -D /dev/ttyACM0
-CTRL A + E  
+CTRL A + E  - echo 
+CTRL + J    - new line (enter)
 ```
 
 ### Buttonless flashing to RP2040
@@ -56,3 +63,22 @@ CTRL A + E
 | 25 | Current | Current=modelID, Capacity = compound date |
 | 28 | Temp-F1713 | SBUS hold frames|
 | 29 | Temp-F1713 | SBUS failsafe frames |
+
+
+### RP2040 zero wiring :
+| PIN RP2040| PIN DEVICE |
+| ------ | ------ |
+|GP 0  | SD CARD - RX |
+|GP 1  | SD CARD - CSN  |
+|GP 2  | SD CARD - SCK |
+|GP 3  | SD CARD - TX |
+|GP 4  | SBUS - TELEMETRY|
+|GP 5  | SBUS - PRIMARY|
+|GP 8  | MAX6675 - RX |
+|GP 9  | MAX6675 - CSN |
+|GP 10 | MAX6675 - SCK | 
+|GP 26 | MS5611 - SDA | 
+|GP 27 | MS5611 - SCL |
+|GP 28 | GPS - RX |
+|GP 29 | GPS - TX |
+

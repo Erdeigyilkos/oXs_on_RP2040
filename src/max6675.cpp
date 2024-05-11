@@ -12,7 +12,7 @@ void max6675::begin(uint8_t SCK, uint8_t RX, uint8_t CS) {
   m_RX = RX;
   m_CS = CS;
 
-  spi_init(spi1, 500 * 1000);  // 500 kHz
+  spi_init(spi0, 500 * 1000);  // 500 kHz
   gpio_set_function(8, GPIO_FUNC_SPI);
   gpio_set_function(10, GPIO_FUNC_SPI);
 
@@ -30,8 +30,8 @@ bool max6675::readC() {
   uint16_t data;
   uint8_t MSB;
   uint8_t LSB;
-  spi_read_blocking(spi1, 0, (uint8_t*)&MSB, sizeof(MSB));
-  spi_read_blocking(spi1, 0, (uint8_t*)&LSB, sizeof(LSB));
+  spi_read_blocking(spi0, 0, (uint8_t*)&MSB, sizeof(MSB));
+  spi_read_blocking(spi0, 0, (uint8_t*)&LSB, sizeof(LSB));
 
   gpio_put(m_CS, 1);
   data = (MSB << 8) | LSB;

@@ -46,6 +46,9 @@ struct CONFIG{
     uint8_t VspeedCompChannel;
     uint8_t ledInverted;
     uint8_t modelID=0;
+    bool sdCardLog;
+    bool sdCardLogMS5611;
+    bool sdCardLogMax6675;
 };
 
 void handleUSBCmd(void);

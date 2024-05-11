@@ -156,6 +156,9 @@ void processCmd(){
     //    printf("     GPIO5 : enter GPIO5=xx where xx = 01 up to 13 (GPIO6...8 will generate channel xx+1...3)\n");
     //    printf("     GPIO11: enter GPIO11=xx where xx = 01 up to 16\n");
         printf("-To change (invert) led color, enter LED=N or LED=I\n");
+        printf("-To enable SD card log: SDLOG=1 \n");
+        printf("To enable SD Vario log: SDMS5611=1 \n");
+        printf("To enable SD Termistor log: SDMAX6675=1 \n");
         printf("-To select the failsafe mode to HOLD, enter FAILSAFE=H\n")  ;
         printf("-To set the failsafe values on the current position, enter SETFAILSAFE\n")  ;
         printf("-To get the internal telemetry values currently calculated by oXs, enter FV (meaning Field Values)\n")  ;
@@ -164,6 +167,7 @@ void processCmd(){
         printf("-To get the current PWM values (in micro sec, enter PWM)\n");
         printf("-To get the current config, just press Enter\n");
         printf("   Note: some changes require a reset to be applied (e.g. to unlock I2C bus)\n");
+
         return;  
     }
     if (cmdBuffer[0] != 0x0){
@@ -469,7 +473,21 @@ void processCmd(){
             config.modelID = atoi(pvalue);
             updateConfig = true;
     }
+
+    if ( strcmp("SDLOG", pkey) == 0 ) { 
+            config.sdCardLog = atoi(pvalue);
+            updateConfig = true;
+    }
     
+    if ( strcmp("SDMS5611", pkey) == 0 ) { 
+            config.sdCardLogMS5611 = atoi(pvalue);
+            updateConfig = true;
+    }
+
+    if ( strcmp("SDMAX6675", pkey) == 0 ) { 
+            config.sdCardLogMax6675 = atoi(pvalue);
+            updateConfig = true;
+    }
     // change scale
     if (( strcmp("SCALE1", pkey) == 0 ) || ( strcmp("SCALE2", pkey) == 0 )\
          || ( strcmp("SCALE3", pkey) == 0 )  || ( strcmp("SCALE4", pkey) == 0 ) ){ 
@@ -966,6 +984,13 @@ void printConfig(){
 
     printf("ModelID: %d \n", config.modelID); 
 
+    if(config.sdCardLog){
+        printf("SD log is ON.\n");
+        printf("Vario log: %s\n", config.sdCardLogMS5611 == true ? "ON" : "OFF");
+        printf("Termistor log: %s\n", config.sdCardLogMax6675 == true ? "ON" : "OFF");
+    }else{
+        printf("SD log is OFF.\n");
+    }
     checkConfig();
 
 }
